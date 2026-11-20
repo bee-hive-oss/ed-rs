@@ -21,6 +21,11 @@ pub fn print_line_number(
     last_addr: usize,
     out: &mut dyn Write,
 ) -> Result<(), CommandError> {
-    let _ = (addr_cnt, second_addr, last_addr, out);
-    todo!("port GNU ed 1.22.4 main_loop.c exec_command '='")
+    let line_number = if addr_cnt != 0 {
+        second_addr
+    } else {
+        last_addr
+    };
+    writeln!(out, "{line_number}")?;
+    Ok(())
 }
