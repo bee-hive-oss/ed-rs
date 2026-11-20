@@ -51,6 +51,9 @@ pub enum CommandError {
     NoCurrentFilename,
     FilenameTooLong,
     UnknownCommand,
+    /// Writing command output failed. GNU ed 1.22.4 does not check stdout
+    /// writes in print_lines, so this text is ed-rs's own, not GNU's.
+    Io(std::io::ErrorKind),
 }
 
 impl CommandError {
@@ -65,6 +68,7 @@ impl CommandError {
             Self::NoCurrentFilename => "No current filename",
             Self::FilenameTooLong => "Filename too long",
             Self::UnknownCommand => "Unknown command",
+            Self::Io(_) => "Cannot write output",
         }
     }
 }
@@ -76,3 +80,9 @@ impl std::fmt::Display for CommandError {
 }
 
 impl std::error::Error for CommandError {}
+
+impl From<std::io::Error> for CommandError {
+    fn from(err: std::io::Error) -> Self {
+        Self::Io(err.kind())
+    }
+}
