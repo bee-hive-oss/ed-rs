@@ -1,3 +1,7 @@
+//! CLI flags and startup options.
+//! Skeleton: fields are unused until this seat is implemented.
+#![allow(dead_code)]
+
 #[derive(Debug, Default)]
 pub struct Options {
     pub silent: bool,
