@@ -16,6 +16,9 @@ pub mod append;
 pub mod delete;
 pub mod equal;
 pub mod filename;
+pub mod insert;
+pub mod list;
+pub mod number;
 pub mod print;
 pub mod quit;
 
