@@ -19,6 +19,9 @@ use super::Status;
 /// not this function, prints the warning and sets the warned flag after
 /// Emod, so a second q can quit.
 pub fn quit(force: bool, modified: bool, warned: bool) -> Status {
-    let _ = (force, modified, warned);
-    todo!("port GNU ed 1.22.4 main_loop.c exec_command q/Q status")
+    if !force && modified && !warned {
+        Status::Emod
+    } else {
+        Status::Quit
+    }
 }
