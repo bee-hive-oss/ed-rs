@@ -154,14 +154,24 @@ run_harnesses() {
 		log "diff_harness.py (ref=/usr/bin/ed cand=${cand})"
 	fi
 
-	python3 "$ROOT/tests/diff_harness.py" --ref /usr/bin/ed --cand "$cand"
+	# Run both suites every time, even when the first fails, so both
+	# scoreboard lines are always printed and a regression in either one
+	# is visible. The script still fails if either suite fails.
+	harness_rc=0
+	python3 "$ROOT/tests/diff_harness.py" --ref /usr/bin/ed --cand "$cand" || harness_rc=$?
 
+	gnu_rc=0
 	if [ "$SELF_CHECK" -eq 1 ]; then
 		log "run_gnu_testsuite.sh --self-check"
-		"$ROOT/tests/run_gnu_testsuite.sh" --self-check
+		"$ROOT/tests/run_gnu_testsuite.sh" --self-check || gnu_rc=$?
 	else
 		log "run_gnu_testsuite.sh ${cand}"
-		"$ROOT/tests/run_gnu_testsuite.sh" "$cand"
+		"$ROOT/tests/run_gnu_testsuite.sh" "$cand" || gnu_rc=$?
+	fi
+
+	if [ "$harness_rc" -ne 0 ] || [ "$gnu_rc" -ne 0 ]; then
+		echo "harness failures: diff_harness.py exit ${harness_rc}, run_gnu_testsuite.sh exit ${gnu_rc}" >&2
+		exit 1
 	fi
 }
 
