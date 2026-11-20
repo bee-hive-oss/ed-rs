@@ -1,0 +1,10 @@
+{
+  "args": [
+    "-s",
+    "in.txt"
+  ],
+  "files": {
+    "in.txt": "hi\n"
+  },
+  "stdin": "f\nf renamed.txt\nf\nq\n"
+}

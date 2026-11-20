@@ -1,0 +1,6 @@
+{
+  "args": [
+    "-s"
+  ],
+  "stdin": "a\nalpha\nbeta\n.\nw out.txt\nq\n"
+}

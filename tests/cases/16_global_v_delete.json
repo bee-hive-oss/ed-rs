@@ -1,0 +1,10 @@
+{
+  "args": [
+    "-s",
+    "in.txt"
+  ],
+  "files": {
+    "in.txt": "keep1\ndrop1\nkeep2\n"
+  },
+  "stdin": "v/keep/d\n,p\nQ\n"
+}

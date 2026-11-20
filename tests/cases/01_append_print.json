@@ -1,0 +1,6 @@
+{
+  "args": [
+    "-s"
+  ],
+  "stdin": "a\nhello\nworld\n.\n,p\nQ\n"
+}

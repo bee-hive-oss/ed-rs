@@ -1,0 +1,10 @@
+{
+  "args": [
+    "-s",
+    "in.txt"
+  ],
+  "files": {
+    "in.txt": "1\n2\n3\n4\n5\n"
+  },
+  "stdin": "2,4d\n,p\nQ\n"
+}

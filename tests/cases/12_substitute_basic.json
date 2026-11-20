@@ -1,0 +1,10 @@
+{
+  "args": [
+    "-s",
+    "in.txt"
+  ],
+  "files": {
+    "in.txt": "hello world\n"
+  },
+  "stdin": "1s/world/rust/\n,p\nQ\n"
+}
