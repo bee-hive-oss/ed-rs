@@ -23,6 +23,76 @@ use super::{CommandError, PFlags};
 /// `io::bytes::write_text` so each char goes out as its byte, and map write
 /// errors to `CommandError::Io`.
 pub fn print_lines(ed: &mut Editor, from: usize, to: usize, pflags: PFlags) -> Result<(), CommandError> {
-    let _ = (ed, from, to, pflags);
-    todo!("port io.c print_lines and print_line for any pflags")
+    let last = ed.buffer.len();
+    if from == 0 || from > to || to > last {
+        return Err(CommandError::InvalidAddress);
+    }
+    let traditional = ed.opts.traditional;
+    let cols = ed.window_columns();
+    for addr in from..=to {
+        let text = ed.buffer.line(addr).unwrap_or("").to_string();
+        ed.buffer.set_current(addr).map_err(|_| CommandError::InvalidAddress)?;
+        let rendered = render(&text, addr, pflags, traditional, cols);
+        crate::io::bytes::write_text(&mut std::io::stdout(), &rendered)
+            .map_err(|err| CommandError::Io(err.kind()))?;
+    }
+    Ok(())
+}
+
+fn render(text: &str, addr: usize, flags: PFlags, traditional: bool, cols: usize) -> String {
+    let mut out = String::new();
+    let mut col = 0usize;
+    if flags.n {
+        out.push_str(&format!("{addr}\t"));
+        col = 8;
+    }
+    if flags.l {
+        for ch in text.chars() {
+            let b = u8::try_from(ch as u32).unwrap_or(b'?');
+            col += 1;
+            if col > cols {
+                col = 1;
+                out.push_str("\\\n");
+            }
+            if (32..=126).contains(&b) {
+                if b == b'$' || b == b'\\' {
+                    col += 1;
+                    out.push('\\');
+                }
+                out.push(ch);
+            } else {
+                col += 1;
+                out.push('\\');
+                match esc(b) {
+                    Some(letter) => out.push(letter),
+                    None => {
+                        col += 2;
+                        out.push((b'0' + (b >> 6)) as char);
+                        out.push((b'0' + ((b >> 3) & 7)) as char);
+                        out.push((b'0' + (b & 7)) as char);
+                    }
+                }
+            }
+        }
+        if !traditional {
+            out.push('$');
+        }
+    } else {
+        out.push_str(text);
+    }
+    out.push('\n');
+    out
+}
+
+fn esc(b: u8) -> Option<char> {
+    match b {
+        0x07 => Some('a'),
+        0x08 => Some('b'),
+        0x0c => Some('f'),
+        b'\n' => Some('n'),
+        b'\r' => Some('r'),
+        b'\t' => Some('t'),
+        0x0b => Some('v'),
+        _ => None,
+    }
 }
