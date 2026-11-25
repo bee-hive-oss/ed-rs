@@ -23,6 +23,73 @@ use super::CommandError;
 /// to `ed.s_pflags.xor(ed.s_pmask)`. Leave `ed.pos` on the newline and
 /// return `Ok(true)`.
 pub fn parse_repeat(ed: &mut Editor) -> Result<bool, CommandError> {
-    let _ = ed;
-    todo!("port the repeat form of main_loop.c command_s")
+    const G: u8 = 0x01;
+    const P: u8 = 0x02;
+    const R: u8 = 0x04;
+    let mut sflags = 0u8;
+    loop {
+        if !step(ed, &mut sflags)? {
+            break;
+        }
+        if ed.peek() == Some('\n') {
+            break;
+        }
+    }
+    if sflags == 0 {
+        return Ok(false);
+    }
+    if ed.regex.subst.is_none() {
+        return Err(CommandError::Message("No previous substitution"));
+    }
+    if sflags & R != 0 {
+        ed.regex.replace_subst_re_by_search_re()?;
+    }
+    if sflags & P != 0 {
+        ed.s_pflags = ed.s_pflags.xor(ed.s_pmask);
+    }
+    Ok(true)
+}
+
+/// One flag. `Ok(false)` ends the scan with `sflags` still 0 (not a repeat).
+fn step(ed: &mut Editor, sflags: &mut u8) -> Result<bool, CommandError> {
+    const G: u8 = 0x01;
+    const P: u8 = 0x02;
+    const R: u8 = 0x04;
+    const NONE: u8 = 0x08;
+    match ed.peek() {
+        Some('1'..='9') => {
+            if *sflags & G != 0 {
+                return Err(CommandError::InvalidCommandSuffix);
+            }
+            let n = super::args::parse_int(ed).map_err(|_| CommandError::InvalidCommandSuffix)?;
+            if n <= 0 {
+                return Err(CommandError::InvalidCommandSuffix);
+            }
+            *sflags |= G;
+            ed.s_snum = n;
+        }
+        Some('\n') => *sflags |= NONE,
+        Some('g') => bit(sflags, G, ed)?,
+        Some('p') => bit(sflags, P, ed)?,
+        Some('r') => bit(sflags, R, ed)?,
+        _ => {
+            if *sflags != 0 {
+                return Err(CommandError::InvalidCommandSuffix);
+            }
+            return Ok(false);
+        }
+    }
+    Ok(true)
+}
+
+fn bit(sflags: &mut u8, flag: u8, ed: &mut Editor) -> Result<(), CommandError> {
+    if *sflags & flag != 0 {
+        return Err(CommandError::InvalidCommandSuffix);
+    }
+    *sflags |= flag;
+    if flag == 0x01 {
+        ed.s_snum = i32::from(ed.s_snum == 0);
+    }
+    ed.bump();
+    Ok(())
 }
