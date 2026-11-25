@@ -14,7 +14,7 @@
 # If cargo is not on PATH, cargo steps run in a rootless podman container
 # built from ./Containerfile. Harnesses always run on the host so they
 # compare against this machine's /usr/bin/ed (GNU ed 1.22.4 on Levo).
-# Runs without root privileges.
+# No sudo.
 
 set -eu
 
@@ -34,7 +34,7 @@ Usage: ./check.sh [--self-check]
                           is available)
 
 Cargo steps run locally when cargo is on PATH, otherwise via rootless
-podman from ./Containerfile. No root privileges needed.
+podman from ./Containerfile. No sudo.
 USAGE
 }
 
