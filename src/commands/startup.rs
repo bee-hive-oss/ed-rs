@@ -3,7 +3,9 @@
 
 #![allow(dead_code)]
 
-use crate::cli::Options;
+use super::editor::Editor;
+use crate::cli::{Options, StartRegexp};
+use std::io::{self, BufReader, IsTerminal};
 
 /// Build the editor and run the loop. Returns the process exit status.
 ///
@@ -24,6 +26,93 @@ use crate::cli::Options;
 /// error as a warning ("<file>: <errmsg>") to stderr. Finally return
 /// `main_loop::main_loop(&mut ed, initial_error, opts.loose_exit)`.
 pub fn start(opts: Options) -> i32 {
-    let _ = opts;
-    1
+    let mut ed = Editor::new(opts, Box::new(BufReader::new(io::stdin())));
+    let mut initial_error = false;
+    if let Some(file) = ed.opts.file.clone() {
+        match load_file(&mut ed, &file) {
+            Boot::Exit(code) => return code,
+            Boot::Initial => {
+                initial_error = true;
+                if !ed.opts.quiet {
+                    eprintln!("{file}: {}", ed.errmsg);
+                }
+            }
+            Boot::Ok => {}
+        }
+    }
+    let loose = ed.opts.loose_exit;
+    super::main_loop::main_loop(&mut ed, initial_error, loose)
+}
+
+enum Boot {
+    Ok,
+    Initial,
+    Exit(i32),
+}
+
+fn interactive() -> bool {
+    io::stdin().is_terminal()
+}
+
+fn load_file(ed: &mut Editor, file: &str) -> Boot {
+    if let Err(err) = crate::io::getname::may_access_filename(file, ed.opts.restricted, ed.opts.unsafe_names) {
+        ed.errmsg = err.message().to_string();
+        return if interactive() { Boot::Initial } else { Boot::Exit(2) };
+    }
+    if !file.starts_with('!') {
+        ed.def_filename = file.to_string();
+        ed.read_only = false;
+    }
+    let (strip, silent, extended, quiet) = (
+        ed.opts.strip_trailing_cr,
+        ed.opts.silent,
+        ed.opts.extended_regexp,
+        ed.opts.quiet,
+    );
+    let start_line = ed.opts.start_line;
+    let start_re = ed.opts.start_regexp.clone();
+    let read = {
+        let Editor { buffer, bin, .. } = &mut *ed;
+        crate::io::read::read_file(buffer, bin, file, 0, strip, silent, &mut io::stdout())
+    };
+    let out = match read {
+        Ok(out) => out,
+        Err(err) => {
+            ed.errmsg = err.message().to_string();
+            return if interactive() { Boot::Initial } else { Boot::Exit(2) };
+        }
+    };
+    ed.read_only = out.read_only;
+    if let Some(n) = start_line {
+        let n = n as usize;
+        if (1..=ed.buffer.len()).contains(&n) {
+            let _ = ed.buffer.set_current(n);
+        }
+    } else if let Some(re) = start_re {
+        return apply_re(ed, &re, file, extended, quiet);
+    }
+    Boot::Ok
+}
+
+fn apply_re(ed: &mut Editor, re: &StartRegexp, file: &str, extended: bool, quiet: bool) -> Boot {
+    let _ = ed.buffer.set_current(0);
+    let (forward, pat) = match re {
+        StartRegexp::Forward(pat) => (true, pat.as_str()),
+        StartRegexp::Backward(pat) => (false, pat.as_str()),
+    };
+    let text = if forward { format!("/{pat}") } else { format!("?{pat}") };
+    let found = crate::regex::search::next_matching_node_addr(&ed.buffer, &mut ed.regex, &text, extended);
+    if let Ok((addr, _)) = found {
+        if (1..=ed.buffer.len()).contains(&addr) {
+            let _ = ed.buffer.set_current(addr);
+            return Boot::Ok;
+        }
+    }
+    let fallback = if forward { 1.min(ed.buffer.len()) } else { ed.buffer.len() };
+    let _ = ed.buffer.set_current(fallback);
+    if !quiet {
+        let shown = if forward { format!("+/{pat}") } else { format!("+?{pat}") };
+        eprintln!("{shown}: {file}: No match found.");
+    }
+    if interactive() { Boot::Ok } else { Boot::Exit(1) }
 }
