@@ -7,7 +7,9 @@
 #![allow(dead_code)]
 
 use super::state::RegexState;
+use super::Regex;
 use crate::commands::CommandError;
+use std::rc::Rc;
 
 impl RegexState {
     /// Ports regex.c `set_subst_regex` and `compile_regex`.
@@ -22,13 +24,31 @@ impl RegexState {
         icase: bool,
         extended: bool,
     ) -> Result<(), CommandError> {
-        let _ = (pat, icase, extended);
-        todo!("port regex.c set_subst_regex")
+        if pat.is_empty() {
+            if icase {
+                return Err(CommandError::Message("Suffix 'I' not allowed on empty regexp"));
+            }
+            let Some(last) = self.last.clone() else {
+                return Err(CommandError::Message("No previous pattern"));
+            };
+            self.subst = Some(last);
+            return Ok(());
+        }
+        let re = Rc::new(
+            Regex::compile(pat, icase, extended).map_err(|e| CommandError::Message(e.message()))?,
+        );
+        self.last = Some(Rc::clone(&re));
+        self.subst = Some(re);
+        Ok(())
     }
 
     /// Ports regex.c `replace_subst_re_by_search_re`: make `subst` the same
     /// regex as `last`, or `Message("No previous pattern")`.
     pub fn replace_subst_re_by_search_re(&mut self) -> Result<(), CommandError> {
-        todo!("port regex.c replace_subst_re_by_search_re")
+        let Some(last) = self.last.clone() else {
+            return Err(CommandError::Message("No previous pattern"));
+        };
+        self.subst = Some(last);
+        Ok(())
     }
 }
