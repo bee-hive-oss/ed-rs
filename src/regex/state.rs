@@ -2,6 +2,7 @@
 
 #![allow(dead_code)]
 
+use super::pattern::extract_pattern;
 use super::Regex;
 use crate::commands::CommandError;
 use std::rc::Rc;
@@ -40,8 +41,40 @@ impl RegexState {
         input: &str,
         extended: bool,
     ) -> Result<(Rc<Regex>, usize), CommandError> {
-        let _ = (input, extended);
-        todo!("port regex.c get_compiled_regex")
+        let Some(delim) = input.chars().next() else {
+            return Err(CommandError::Message("Invalid pattern delimiter"));
+        };
+        if delim == ' ' || delim == '\n' || delim == '\0' {
+            return Err(CommandError::Message("Invalid pattern delimiter"));
+        }
+        let mut used = delim.len_utf8();
+        let rest = &input[used..];
+        let next = rest.chars().next();
+        if next.is_none() || next == Some(delim) || next == Some('\n') || next == Some('\0') {
+            let Some(last) = self.last.clone() else {
+                return Err(CommandError::Message("No previous pattern"));
+            };
+            if next == Some(delim) {
+                used += delim.len_utf8();
+                if input[used..].starts_with('I') {
+                    return Err(CommandError::Message("Suffix 'I' not allowed on empty regexp"));
+                }
+            }
+            return Ok((last, used));
+        }
+        let (pat, rel) = extract_pattern(rest, delim)?;
+        used += rel;
+        let mut icase = false;
+        if input[used..].starts_with(delim) {
+            used += delim.len_utf8();
+            if input[used..].starts_with('I') {
+                icase = true;
+                used += 1;
+            }
+        }
+        let re = Rc::new(compile(&pat, icase, extended)?);
+        self.last = Some(Rc::clone(&re));
+        Ok((re, used))
     }
 
     /// Ports regex.c `get_pattern_for_s`.
@@ -53,7 +86,52 @@ impl RegexState {
     /// (`Message("No previous pattern")`) and returns an empty string. A
     /// missing closing delimiter is `Message("Missing pattern delimiter")`.
     pub fn get_pattern_for_s(&self, input: &str) -> Result<(String, usize), CommandError> {
-        let _ = input;
-        todo!("port regex.c get_pattern_for_s")
+        let Some(delim) = input.chars().next() else {
+            return Err(CommandError::Message("Invalid pattern delimiter"));
+        };
+        if delim == ' ' || delim == '\n' {
+            return Err(CommandError::Message("Invalid pattern delimiter"));
+        }
+        let rest = &input[delim.len_utf8()..];
+        if rest.starts_with(delim) {
+            if self.last.is_none() {
+                return Err(CommandError::Message("No previous pattern"));
+            }
+            return Ok((String::new(), delim.len_utf8()));
+        }
+        let (pat, rel) = extract_pattern(rest, delim)?;
+        let used = delim.len_utf8() + rel;
+        if !input[used..].starts_with(delim) {
+            return Err(CommandError::Message("Missing pattern delimiter"));
+        }
+        Ok((pat, used))
+    }
+}
+
+fn compile(pat: &str, icase: bool, extended: bool) -> Result<Regex, CommandError> {
+    Regex::compile(pat, icase, extended).map_err(|e| CommandError::Message(e.message()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::RegexState;
+    use crate::commands::CommandError::Message;
+
+    #[test]
+    fn last_and_s_pattern() {
+        let mut s = RegexState::default();
+        assert_eq!(s.get_compiled_regex(" ", false).unwrap_err(), Message("Invalid pattern delimiter"));
+        assert_eq!(s.get_pattern_for_s("//").unwrap_err(), Message("No previous pattern"));
+        let (re, n) = s.get_compiled_regex("/a\\+/I", false).unwrap();
+        assert_eq!(n, 6);
+        assert!(re.icase);
+        assert_eq!(re.exec("XA", false).unwrap()[0], Some((1, 2)));
+        assert_eq!(s.get_compiled_regex("//I", false).unwrap_err(), Message("Suffix 'I' not allowed on empty regexp"));
+        assert_eq!(s.get_compiled_regex("//x", false).unwrap().1, 2);
+        assert_eq!(s.get_pattern_for_s(" /a/").unwrap_err(), Message("Invalid pattern delimiter"));
+        assert_eq!(s.get_pattern_for_s("/b").unwrap_err(), Message("Missing pattern delimiter"));
+        assert_eq!(s.get_pattern_for_s("//").unwrap(), (String::new(), 1));
+        assert_eq!(s.get_pattern_for_s("/b[/]/").unwrap().0, "b[/]");
+        assert_eq!(s.get_compiled_regex("?b?", false).unwrap().1, 3);
     }
 }
