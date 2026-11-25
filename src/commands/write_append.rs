@@ -9,6 +9,5 @@ use super::ArmResult;
 
 /// 'W': call `write::write_lines` with `append` true.
 pub fn arm(ed: &mut Editor, isglobal: bool) -> ArmResult {
-    let _ = (ed, isglobal);
-    todo!("W arm of main_loop.c exec_command")
+    super::write::write_lines(ed, isglobal, true)
 }
