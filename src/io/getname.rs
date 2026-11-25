@@ -20,8 +20,24 @@ pub fn may_access_filename(
     restricted: bool,
     unsafe_names: bool,
 ) -> Result<(), CommandError> {
-    let _ = (name, restricted, unsafe_names);
-    todo!("port main.c may_access_filename")
+    if name.is_empty() || name.ends_with('/') {
+        return Err(CommandError::Message("Is a directory"));
+    }
+    if restricted {
+        if name.starts_with('!') {
+            return Err(CommandError::Message("Shell access restricted"));
+        }
+        if name == ".." || name.contains('/') {
+            return Err(CommandError::Message("Directory access restricted"));
+        }
+    }
+    if name.contains('\n') {
+        return Err(CommandError::Message("Newline character not allowed in file names"));
+    }
+    if !unsafe_names && name.chars().any(forbidden_control) {
+        return Err(CommandError::Message("Control characters not allowed in file names"));
+    }
+    Ok(())
 }
 
 /// Ports main_loop.c `get_filename`.
@@ -44,6 +60,90 @@ pub fn get_filename(
     ed: &mut Editor,
     traditional_f_command: bool,
 ) -> Result<String, CommandError> {
-    let _ = (ed, traditional_f_command);
-    todo!("port main_loop.c get_filename")
+    crate::commands::args::skip_blanks(ed);
+    if ed.peek().is_none() || ed.peek() == Some('\n') {
+        if !traditional_f_command && ed.def_filename.is_empty() {
+            return Err(CommandError::NoCurrentFilename);
+        }
+        if ed.peek() == Some('\n') {
+            ed.bump();
+        }
+        return Ok(String::new());
+    }
+    let first = ed.rest().to_string();
+    let joined = {
+        let mut next = || ed.next_line();
+        crate::io::extended::get_extended_line(&first, true, &mut next)?
+    };
+    ed.cmd = joined;
+    ed.pos = 0;
+    if ed.peek() == Some('!') {
+        ed.bump();
+        return crate::io::shellcmd::get_shell_command(ed);
+    }
+    let mut name = String::new();
+    if ed.rest().starts_with("~/") {
+        if let Some(home) = home_dir() {
+            name.push_str(&home);
+            ed.bump();
+        }
+    }
+    while let Some(ch) = ed.peek() {
+        if ch == '\n' {
+            break;
+        }
+        name.push(ch);
+        ed.bump();
+    }
+    if name.chars().count() > 4096 {
+        return Err(CommandError::Message("Filename too long"));
+    }
+    if ed.peek() == Some('\n') {
+        ed.bump();
+    }
+    may_access_filename(&name, ed.opts.restricted, ed.opts.unsafe_names)?;
+    Ok(name)
+}
+
+fn home_dir() -> Option<String> {
+    let home = std::env::var("HOME").ok()?;
+    (!home.is_empty()).then_some(home)
+}
+
+fn forbidden_control(c: char) -> bool {
+    let b = c as u32;
+    (7..=13).contains(&b) || b == 27 || b == 127
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{get_filename, may_access_filename};
+    use crate::cli::Options;
+    use crate::commands::editor::Editor;
+    use crate::commands::CommandError;
+
+    fn ed(cmd: &str) -> Editor {
+        let mut e = Editor::new(Options::default(), Box::new(std::io::Cursor::new("")));
+        e.cmd = cmd.into();
+        e
+    }
+
+    #[test]
+    fn access_rules_and_names() {
+        assert!(may_access_filename("", false, false).is_err());
+        assert!(may_access_filename("a/", false, false).is_err());
+        assert!(may_access_filename("a", false, false).is_ok());
+        assert!(may_access_filename("!x", true, false).is_err());
+        assert!(may_access_filename("a/b", true, false).is_err());
+        assert!(may_access_filename("a\n", false, false).is_err());
+        assert!(may_access_filename("a\u{7}", false, false).is_err());
+        assert!(may_access_filename("a\u{7}", false, true).is_ok());
+        assert_eq!(get_filename(&mut ed("  f\n"), false).unwrap(), "f");
+        assert_eq!(get_filename(&mut ed("\n"), false), Err(CommandError::NoCurrentFilename));
+        let mut e = ed("\n");
+        e.def_filename = "old".into();
+        assert_eq!(get_filename(&mut e, false).unwrap(), "");
+        assert_eq!(get_filename(&mut ed("\n"), true).unwrap(), "");
+        assert_eq!(get_filename(&mut ed("!ls\n"), false).unwrap(), "!ls");
+    }
 }
