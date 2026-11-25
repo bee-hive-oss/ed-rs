@@ -26,6 +26,45 @@ pub fn search_and_replace(
     snum: i32,
     isglobal: bool,
 ) -> Result<(), CommandError> {
-    let _ = (ed, from, to, snum, isglobal);
-    todo!("port regex.c search_and_replace")
+    if from == 0 || from > to || to > ed.buffer.len() {
+        return Err(CommandError::InvalidAddress);
+    }
+    let re = ed
+        .regex
+        .subst
+        .clone()
+        .ok_or(CommandError::Message("No previous substitution"))?;
+    let template = ed.regex.replacement.clone().unwrap_or_default();
+    let mut addr = from;
+    let mut found = false;
+    for _ in 0..(to - from + 1) {
+        let line = ed.buffer.line(addr).map_err(super::buf_err)?.to_string();
+        match crate::regex::subst::line_replace(&re, &template, &line, snum)? {
+            None => addr += 1,
+            Some(text) => {
+                let old_len = ed.buffer.len();
+                let parts: Vec<String> = text.split('\n').map(str::to_string).collect();
+                let n = parts.len();
+                if isglobal {
+                    ed.active.on_delete(addr, addr);
+                }
+                ed.buffer.replace(addr, addr, parts).map_err(super::buf_err)?;
+                if isglobal {
+                    ed.active.on_insert(addr.saturating_sub(1), n);
+                }
+                if addr == old_len {
+                    ed.bin.unterminated = false;
+                }
+                found = true;
+                addr = ed.buffer.current() + 1;
+            }
+        }
+    }
+    if !found && !isglobal {
+        return Err(CommandError::Message("No match"));
+    }
+    if found {
+        ed.buffer.set_modified(true);
+    }
+    Ok(())
 }
