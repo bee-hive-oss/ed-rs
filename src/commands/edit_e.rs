@@ -11,6 +11,26 @@ use super::ArmResult;
 /// `Ok(Status::Emod)`. Otherwise do exactly what E does by calling
 /// `edit::edit_file`.
 pub fn arm(ed: &mut Editor, isglobal: bool) -> ArmResult {
-    let _ = (ed, isglobal);
-    todo!("port the 'e' arm of GNU ed 1.22.4 main_loop.c exec_command")
+    if ed.buffer.is_modified() && !ed.warned {
+        return Ok(super::Status::Emod);
+    }
+    super::edit::edit_file(ed, isglobal)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::arm;
+    use crate::cli::Options;
+    use crate::commands::editor::Editor;
+    use crate::commands::Status;
+
+    #[test]
+    fn refuses_a_modified_buffer_until_warned() {
+        let mut e = Editor::new(Options::default(), Box::new(std::io::Cursor::new("")));
+        e.buffer.load(["a"]);
+        e.buffer.set_modified(true);
+        e.cmd = "\n".into();
+        assert_eq!(arm(&mut e, false).unwrap(), Status::Emod);
+        assert_eq!(e.buffer.line(1).unwrap(), "a");
+    }
 }
