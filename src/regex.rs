@@ -91,8 +91,12 @@ impl Regex {
     /// Same as regcomp with REG_ICASE when `icase` and REG_EXTENDED when
     /// `extended`. Pick `parse_bre::parse_bre` or `parse_ere::parse_ere`.
     pub fn compile(pattern: &str, icase: bool, extended: bool) -> Result<Regex, RegexError> {
-        let _ = (pattern, icase, extended);
-        todo!("compile with the BRE or ERE parser")
+        let program = if extended {
+            parse_ere::parse_ere(pattern)?
+        } else {
+            parse_bre::parse_bre(pattern)?
+        };
+        Ok(Regex { program, icase })
     }
 
     /// Number of parenthesized groups (C re_nsub).
@@ -104,8 +108,19 @@ impl Regex {
     /// slots 1..=nsub are the groups (None when a group did not take part).
     /// `notbol` is REG_NOTBOL: `^` does not match at offset 0.
     pub fn exec(&self, text: &str, notbol: bool) -> Option<Captures> {
-        let _ = (text, notbol);
-        todo!("try each start offset with matcher::Matcher")
+        let mut m = matcher::Matcher::new(text, self.icase, notbol, self.program.nsub);
+        let mut pos = 0;
+        loop {
+            m.caps.fill(None);
+            if m.run(&self.program.root, pos, &mut |mm, end| {
+                mm.caps[0] = Some((pos, end));
+                true
+            }) {
+                return Some(m.caps.clone());
+            }
+            let ch = text[pos..].chars().next()?;
+            pos += ch.len_utf8();
+        }
     }
 
     /// True when [`Regex::exec`] finds a match (regexec with no captures).
@@ -117,4 +132,18 @@ impl Regex {
 /// Early placeholder kept so older callers still compile.
 pub fn matches(_pattern: &str, _line: &str) -> bool {
     false
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Regex;
+    #[test]
+    fn compile_and_leftmost() {
+        let re = Regex::compile(r"\(a\+\)", false, false).unwrap();
+        assert_eq!(re.exec("baa", false).unwrap()[1], Some((1, 3)));
+        assert!(Regex::compile("^a", false, false).unwrap().exec("a", true).is_none());
+        let ere = Regex::compile("A+", true, true).unwrap();
+        assert_eq!(ere.exec("xa", false).unwrap()[0], Some((1, 2)));
+        assert!(Regex::compile("*", false, true).is_err());
+    }
 }
