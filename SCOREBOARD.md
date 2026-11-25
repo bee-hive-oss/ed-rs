@@ -23,3 +23,4 @@ hive-runner repo, then append it below.
 |---|---|---|---|---|---|---|---|
 | 2026-11-20 11:23 | `3f744a0` | 37 pass | clean | green | 0/20 | 86/243 | buffer and address (#4), one-command stubs (#13) |
 | 2026-11-25 12:28 | `aa45d12` | 89 pass | clean | green | 0/20 | 86/243 | #21 q/Q, #22 =, #23 f, #31 Nori's starter files, #24 d, #25 p, #27 n, #28 l, #29 a, #30 i |
+| 2026-11-25 16:54 | `a9574a1` | 102 pass | clean | green | 0/20 | 86/243 | through ticket #69 (PRs #92 to #119 merged Nov 25); binary still stops at stdin read (ticket #33 open) |
