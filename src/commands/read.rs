@@ -17,6 +17,36 @@ use super::ArmResult;
 /// `ed.opts.silent`. If any line was read, mark the buffer modified. When
 /// `isglobal`, call `ed.active.on_insert`.
 pub fn arm(ed: &mut Editor, isglobal: bool) -> ArmResult {
-    let _ = (ed, isglobal);
-    todo!("port the 'r' arm of GNU ed 1.22.4 main_loop.c exec_command")
+    super::args::unexpected_command_suffix(ed)?;
+    if ed.addr_cnt == 0 {
+        ed.second = ed.buffer.len();
+    }
+    let name = crate::io::getname::get_filename(ed, false)?;
+    if ed.def_filename.is_empty() && !name.is_empty() && !name.starts_with('!') {
+        ed.def_filename.clone_from(&name);
+        ed.read_only = false;
+    }
+    if !isglobal {
+        ed.snapshot();
+    }
+    let addr = ed.second;
+    let target = if name.is_empty() { ed.def_filename.clone() } else { name };
+    let strip = ed.opts.strip_trailing_cr;
+    let scripted = ed.opts.silent;
+    let outcome = crate::io::read::read_file(
+        &mut ed.buffer,
+        &mut ed.bin,
+        &target,
+        addr,
+        strip,
+        scripted,
+        &mut std::io::stdout(),
+    )?;
+    if outcome.lines > 0 {
+        ed.buffer.set_modified(true);
+        if isglobal {
+            ed.active.on_insert(addr, outcome.lines);
+        }
+    }
+    Ok(super::Status::Ok)
 }
