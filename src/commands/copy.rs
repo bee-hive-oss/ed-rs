@@ -17,6 +17,21 @@ use super::ArmResult;
 /// lines after it (in C that line node is then no longer the unterminated
 /// last line).
 pub fn arm(ed: &mut Editor, isglobal: bool) -> ArmResult {
-    let _ = (ed, isglobal);
-    todo!("port the 't' arm of GNU ed 1.22.4 main_loop.c exec_command and buffer.c copy_lines")
+    super::range::set_addr_range2(ed)?;
+    let dest = super::range::get_third_addr(ed)?;
+    super::args::get_command_suffix(ed)?;
+    if !isglobal {
+        ed.snapshot();
+    }
+    let (from, to) = (ed.first, ed.second);
+    let old_len = ed.buffer.len();
+    let count = to - from + 1;
+    ed.buffer.copy(from, to, dest).map_err(super::buf_err)?;
+    if isglobal {
+        ed.active.on_insert(dest, count);
+    }
+    if dest == old_len {
+        ed.bin.unterminated = false;
+    }
+    Ok(super::Status::Ok)
 }
