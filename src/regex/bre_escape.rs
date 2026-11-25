@@ -35,6 +35,23 @@ pub enum BreEscape {
 /// `closed` (the number of groups already closed) is BadBackref, matching
 /// regcomp's REG_ESUBREG.
 pub fn classify_escape(chars: &[char], pos: usize, closed: usize) -> Result<BreEscape, RegexError> {
-    let _ = (chars, pos, closed);
-    todo!("classify a BRE backslash pair")
+    let Some(&c) = chars.get(pos) else {
+        return Err(RegexError::TrailingBackslash);
+    };
+    Ok(match c {
+        '(' => BreEscape::GroupOpen,
+        ')' => BreEscape::GroupClose,
+        '|' => BreEscape::Alt,
+        '+' => BreEscape::Plus,
+        '?' => BreEscape::Question,
+        '{' => BreEscape::Interval,
+        '1'..='9' => {
+            let n = (c as u8 - b'0') as usize;
+            if n > closed {
+                return Err(RegexError::BadBackref);
+            }
+            BreEscape::Backref(n)
+        }
+        other => BreEscape::Literal(other),
+    })
 }
