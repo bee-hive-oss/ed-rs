@@ -31,7 +31,8 @@ pub fn get_shell_command(ed: &mut Editor) -> Result<String, CommandError> {
         let mut next = || ed.next_line();
         crate::io::extended::get_extended_line(&first, true, &mut next)?
     };
-    ed.cmd = joined;
+    let tail = first.split_once('\n').map_or("", |(_, rest)| rest);
+    ed.cmd = format!("{joined}{tail}");
     ed.pos = 0;
 
     let mut buf = String::new();
@@ -117,6 +118,10 @@ mod tests {
         let mut e = ed("cat %\n", "");
         e.def_filename = "foo".into();
         assert_eq!(get_shell_command(&mut e).unwrap(), "!cat foo");
+
+        let mut e = ed("ls\nq\n", "");
+        assert_eq!(get_shell_command(&mut e).unwrap(), "!ls");
+        assert_eq!(e.rest(), "q\n");
     }
 
     #[test]
