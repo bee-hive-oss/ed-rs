@@ -11,6 +11,9 @@ use super::ArmResult;
 /// and not `ed.opts.traditional`; then print that one line with
 /// `print_any::print_lines` and no flags.
 pub fn arm(ed: &mut Editor, isglobal: bool) -> ArmResult {
-    let _ = (ed, isglobal);
-    todo!("port the newline arm of main_loop.c exec_command")
+    let dot = ed.buffer.current();
+    let addr = if isglobal && !ed.opts.traditional { dot } else { dot + 1 };
+    super::range::set_second_addr(ed, addr)?;
+    super::print_any::print_lines(ed, ed.second, ed.second, super::PFlags::default())?;
+    Ok(super::Status::Ok)
 }
