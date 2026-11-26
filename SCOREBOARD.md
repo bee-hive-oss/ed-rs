@@ -22,3 +22,8 @@ hive-runner repo, then append it below.
 | Date (CT) | Commit | Cargo tests | Clippy | Self-check | Starter cases | GNU ed testsuite | Note |
 |---|---|---|---|---|---|---|---|
 | 2026-11-20 11:23 | `3f744a0` | 37 pass | clean | green | 0/20 | 86/243 | buffer and address (#4), one-command stubs (#13) |
+| 2026-11-25 12:28 | `aa45d12` | 89 pass | clean | green | 0/20 | 86/243 | #21 q/Q, #22 =, #23 f, #31 Nori's starter files, #24 d, #25 p, #27 n, #28 l, #29 a, #30 i |
+| 2026-11-25 16:54 | `a9574a1` | 102 pass | clean | green | 0/20 | 86/243 | through ticket #69 (PRs #92 to #119 merged Nov 25); binary still stops at stdin read (ticket #33 open) |
+| 2026-11-25 17:23 | `1a1289b` | 117 pass | clean | green | 10/20 | 86/243 | through ticket #41 (PRs #120 to #132 merged Nov 25, input wiring); binary now reads and runs commands, GNU suite waits on r/w/s/g/u (tickets #70 to #91) |
+| 2026-11-25 17:31 | `8fc9eb2` | 123 pass | clean | green | 15/20 | 111/243 | through ticket #80 (PRs #133 to #144 merged Nov 25: E, e, g, v, G, V, h, H, j, k, m) |
+| 2026-11-25 17:44 | `339eecd` | 124 pass | clean | green | 20/20 | 170/243 | through ticket #88 (PRs #145 to #153 merged Nov 25: P, r, s, t, u, w, W, x) |
