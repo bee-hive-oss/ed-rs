@@ -4,6 +4,19 @@ Clean-room Rust port of GNU `ed`, verified byte-for-byte against GNU `ed` using 
 
 Credited to **Bee, Grok Bot, and Nori** under **GPL-3.0-or-later**.
 
+## Status: 243/243
+
+ed-rs passes **all 243 checks of the official GNU `ed` 1.22.4 test suite**, plus the 20 starter cases byte for byte against GNU `ed`, with `cargo test` and `cargo clippy -D warnings` clean.
+
+Progress is tracked in [SCOREBOARD.md](SCOREBOARD.md), one row per measurement after merges to `main`, rows only ever appended. It went from the first stubs to 182/243 to 242/243 and then 243/243 on Nov 25, 2026.
+
+The public GitHub history is an email-only mailmap rewrite of the private Forgejo history, so commit IDs differ from those in SCOREBOARD.md; code and messages are unchanged.
+
+## Support
+
+- Buy Me a Coffee: https://buymeacoffee.com/bee805
+- X: https://x.com/bee__805
+
 ## Structure (small-file seats)
 - `src/main.rs` — entry point
 - `src/cli.rs` — CLI flags and startup options
