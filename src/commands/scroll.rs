@@ -14,6 +14,19 @@ use super::ArmResult;
 /// `min($, second + ed.window_lines() - 1)` with the suffix flags; then
 /// clear `ed.pflags`.
 pub fn arm(ed: &mut Editor, isglobal: bool) -> ArmResult {
-    let _ = (ed, isglobal);
-    todo!("port the 'z' arm of GNU ed 1.22.4 main_loop.c exec_command")
+    let dot = ed.buffer.current();
+    let addr = if isglobal { dot } else { dot + 1 };
+    super::range::set_second_addr(ed, addr)?;
+    if matches!(ed.peek(), Some('1'..='9')) {
+        let n = super::args::parse_int(ed)?;
+        if n > 0 {
+            ed.user_lines = usize::try_from(n).unwrap_or(0);
+        }
+    }
+    super::args::get_command_suffix(ed)?;
+    let end = ed.buffer.len().min(ed.second + ed.window_lines() - 1);
+    let flags = ed.pflags;
+    super::print_any::print_lines(ed, ed.second, end, flags)?;
+    ed.pflags = super::PFlags::default();
+    Ok(super::Status::Ok)
 }
