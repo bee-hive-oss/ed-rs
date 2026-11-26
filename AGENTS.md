@@ -23,7 +23,8 @@ One seat file owns one concern. Edit only the file(s) your ticket names.
 ## Rules
 
 - **One change per file per PR.** Do not edit another seat's file unless the ticket explicitly spans those files.
-- Before pushing, run `honeypot preflight` and/or `./check.sh` locally and only push a passing result. On a machine without Rust, `./check.sh` runs the cargo steps in rootless podman via `Containerfile`.
+- Before pushing, run `./check.sh` locally and only push a passing result. On a machine without Rust, `./check.sh` runs the cargo steps in rootless podman via `Containerfile`.
+- Internal CI tooling names are left out of public docs on purpose, for anonymization. `./check.sh` is the only entry point you need.
 - Use `./check.sh --self-check` to prove the harnesses against `/usr/bin/ed` without expecting the still-unfinished `ed-rs` binary to pass the GNU suite.
 - **NEVER** weaken, delete, skip, or comment out tests in `tests/`.
 - **NEVER** alter `tests/diff_harness.py` or anything under `tests/gnu_ed_testsuite/` (except that you may add new starter JSON cases under `tests/cases/` when a ticket says to).
