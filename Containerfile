@@ -1,4 +1,4 @@
-FROM docker.io/library/rust:1.85-slim-bookworm
+FROM docker.io/library/rust:1.100.0-slim-trixie
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ed python3 ca-certificates \
