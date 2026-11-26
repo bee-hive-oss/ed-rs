@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      ED_VERSION: "1.22.4"
+      ED_SHA256: 987a1ebbbad3fcf63a1ffa9e29b3fa7de065150d16319d0a49dd8b57f81d3e9c
+      RUST_TOOLCHAIN: stable
+      CARGO_TERM_COLOR: never
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Check out the tested commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Install Rust toolchain
+        run: |
+          set -eu
+          rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal --component clippy --no-self-update
+          rustup default "$RUST_TOOLCHAIN"
+          cargo --version
+          cargo clippy --version
+
+      - name: Build GNU ed reference
+        run: |
+          set -eu
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends lzip
+          curl -fsSL -o "/tmp/ed-$ED_VERSION.tar.lz" "https://ftp.gnu.org/gnu/ed/ed-$ED_VERSION.tar.lz"
+          echo "$ED_SHA256  /tmp/ed-$ED_VERSION.tar.lz" | sha256sum -c
+          mkdir -p /tmp/ed-build
+          tar --lzip -xf "/tmp/ed-$ED_VERSION.tar.lz" -C /tmp/ed-build
+          cd "/tmp/ed-build/ed-$ED_VERSION"
+          ./configure --prefix=/usr
+          make
+          sudo make install
+          /usr/bin/ed --version | grep -q "$ED_VERSION"
+
+      - name: Run ./check.sh
+        run: |
+          set -euo pipefail
+          mkdir -p ci-out
+          test "$(git rev-parse HEAD)" = "$HEAD_SHA"
+          started=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          rc=0
+          ./check.sh 2>&1 | tee ci-out/check.log || rc=$?
+          cargo --version > ci-out/tools.txt
+          cargo clippy --version >> ci-out/tools.txt
+          /usr/bin/ed --version | head -n 1 >> ci-out/tools.txt
+          python3 - "$rc" "$started" <<'PY'
+          import json, os, sys, datetime
+          json.dump({
+              "schema": 1,
+              "repository": os.environ["GITHUB_REPOSITORY"],
+              "event": os.environ["GITHUB_EVENT_NAME"],
+              "head_sha": os.environ["HEAD_SHA"],
+              "run_id": int(os.environ["GITHUB_RUN_ID"]),
+              "run_attempt": int(os.environ["GITHUB_RUN_ATTEMPT"]),
+              "command": "./check.sh",
+              "exit_code": int(sys.argv[1]),
+              "started": sys.argv[2],
+              "finished": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+          }, open("ci-out/result.json", "w"), indent=2)
+          PY
+          exit "$rc"
+
+      - name: Upload logs and result
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ci-result
+          path: ci-out/
+          if-no-files-found: error
+          retention-days: 14
