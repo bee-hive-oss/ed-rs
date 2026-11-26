@@ -15,6 +15,54 @@
 
 set -eu
 
+# Prefer bash for the official script. dash leaves $LINENO blank, so
+# start-up failures print no line numbers and cannot be counted.
+official_interpreter() {
+	if command -v bash >/dev/null 2>&1; then
+		printf '%s\n' bash
+	else
+		printf '%s\n' ""
+	fi
+}
+
+# Start-up failures are the numbers on the line right after
+# "testing ed-...". Each number may have a reason in brackets after it.
+# A following "*** ..." line is a script failure, not a start-up failure.
+count_startup_failures() {
+	printf '%s\n' "$1" | awk '
+		BEGIN { c = 0 }
+		/testing ed-/ {
+			if ((getline line) > 0 && line !~ /\*\*\*/) {
+				gsub(/\([^)]*\)/, "", line)
+				n = split(line, a, /[^0-9]+/)
+				for (i = 1; i <= n; i++) if (a[i] != "") c++
+			}
+			exit
+		}
+		END { print c + 0 }
+	'
+}
+
+# Built-in check so a miscount cannot go silent. Fixtures cover mixed
+# start-up and script failures, bracketed reasons, and script-only output.
+verify_failure_counter() {
+	_assert_startup_count() {
+		_got=$(count_startup_failures "$2" | tr -d " \n")
+		[ -n "$_got" ] || _got=0
+		if [ "$_got" -ne "$3" ]; then
+			echo "run_gnu_testsuite.sh: failure counter $1 counted $_got start-up failures, expected $3" >&2
+			exit 2
+		fi
+	}
+	_assert_startup_count mixed "$(printf '%s\n' "testing ed-1.22.4..." " 44 52 54" "*** a ***" "*** b ***")" 3
+	_assert_startup_count reasons "$(printf '%s\n' "testing ed-1.22.4..." " 44 (no match) 52 54")" 3
+	_assert_startup_count scripts_only "$(printf '%s\n' "testing ed-1.22.4..." "*** a ***" "*** b ***")" 0
+	_assert_startup_count none "$(printf '%s\n' "testing ed-1.22.4..." "tests completed successfully.")" 0
+	_assert_startup_count blank_lineno "$(printf '%s\n' "testing ed-1.22.4..." "   " "*** a ***")" 0
+}
+
+verify_failure_counter
+
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 TESTDIR="${SCRIPT_DIR}/gnu_ed_testsuite"
 VERSION="1.22.4"
@@ -134,9 +182,23 @@ ln -s "$ED_BIN" "${objdir}/ed"
 
 set +e
 # Run from objdir, as Makefile.in does: check.sh testdir pkgversion
+official_interp=$(official_interpreter)
+if [ -n "$official_interp" ]; then
+	# bash fills in $LINENO; a blank probe means start-up
+	# failures would be silently dropped from the count.
+	lineno_probe=$(bash -c 'printf %s "$LINENO"')
+	if [ -z "$lineno_probe" ]; then
+		echo "bash is on PATH but \$LINENO is empty; start-up failures would not be counted" >&2
+		exit 2
+	fi
+fi
 official_out=$(
 	cd "$objdir" || exit 1
-	"$OFFICIAL_CHECK" "$TESTDIR" "$VERSION"
+	if [ -n "$official_interp" ]; then
+		bash "$OFFICIAL_CHECK" "$TESTDIR" "$VERSION"
+	else
+		"$OFFICIAL_CHECK" "$TESTDIR" "$VERSION"
+	fi
 )
 official_rc=$?
 set -e
@@ -151,16 +213,29 @@ if [ "$official_rc" -eq 0 ]; then
 fi
 
 # Best-effort failed-check count from official messages.
-# Startup failures print " LINENO" (and maybe "(reason)") via test_failed;
-# script failures print a "*** ... ***" line.
-n_fail=0
+# Start-up failures are the numbers on the line right after
+# "testing ed-..."; script failures print a "*** ... ***" line.
+n_fail_startup=$(count_startup_failures "$official_out" | tr -d " \n")
+[ -n "$n_fail_startup" ] || n_fail_startup=0
 n_fail_scripts=$(printf '%s\n' "$official_out" | grep -c '\*\*\*' || true)
-# Prefer script failure count when present; if official failed with no
-# *** lines, treat the startup block as incomplete rather than guessing.
-n_fail=$n_fail_scripts
+n_fail=$((n_fail_startup + n_fail_scripts))
 if [ "$n_fail" -eq 0 ]; then
-	# Official failed, but we couldn't name individual cases (startup).
+	# Official failed, but we couldn't name individual cases.
 	n_fail=1
+fi
+# If bash ran the official script and the start-up line came out
+# as blank spaces, line numbers were lost and the count is wrong.
+if [ -n "$official_interp" ] && [ "$n_fail_startup" -eq 0 ]; then
+	startup_line=$(printf '%s\n' "$official_out" | awk '/testing ed-/{getline; print; exit}')
+	case "$startup_line" in
+		*[![:space:]]*) ;;
+		*)
+			if [ -n "$startup_line" ]; then
+				echo "run_gnu_testsuite.sh: start-up failure line numbers were blank; cannot count them" >&2
+				exit 2
+			fi
+			;;
+	esac
 fi
 n_pass=$((n_total - n_fail))
 if [ "$n_pass" -lt 0 ]; then
