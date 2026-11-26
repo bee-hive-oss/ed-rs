@@ -6,8 +6,9 @@
 //! the parse fails. Nothing else on the buffer changes: lines, marks, the
 //! dirty flag, and the undo snapshot stay as they were.
 //!
-//! `/re/` and `?re?` are rejected with [`AddressError::RegexNotSupported`]
-//! when they would start an address. A later regex seat can replace that arm.
+//! `/re/` and `?re?` go to a search hook when they would start an address.
+//! [`parse_addresses_with`] takes that hook; [`parse_addresses`] passes one
+//! that rejects them with [`AddressError::RegexNotSupported`].
 //! After an address is already in progress, `/` and `?` are
 //! [`AddressError::InvalidAddress`], matching GNU ed.
 //!
@@ -33,6 +34,8 @@ pub enum AddressError {
     /// `src/regex.rs` does not exist yet as a real matcher. This is the hook
     /// that seat will replace.
     RegexNotSupported,
+    /// The search hook failed, with GNU ed's text (for example "No match").
+    Search(&'static str),
 }
 
 impl fmt::Display for AddressError {
@@ -42,6 +45,7 @@ impl fmt::Display for AddressError {
             Self::InvalidMark => "Invalid mark character",
             Self::NumberOutOfRange => "Number out of range",
             Self::RegexNotSupported => "Regular expression addresses are not implemented",
+            Self::Search(text) => text,
         })
     }
 }
@@ -96,6 +100,23 @@ pub struct ParsedAddresses<'a> {
 pub fn parse_addresses<'a>(
     buffer: &mut Buffer,
     input: &'a str,
+) -> Result<ParsedAddresses<'a>, AddressError> {
+    parse_addresses_with(buffer, input, &mut |_, _| {
+        Err(AddressError::RegexNotSupported)
+    })
+}
+
+/// Search hook for `/re/` and `?re?`. It gets the buffer and the input
+/// starting at the `/` or `?`, and returns the matching line and how many
+/// bytes it used (pattern, closing delimiter, and any `I` suffix).
+pub type SearchHook<'h> = &'h mut dyn FnMut(&Buffer, &str) -> Result<(usize, usize), AddressError>;
+
+/// [`parse_addresses`] with a search hook for `/re/` and `?re?` (GNU ed
+/// 1.22.4 extract_addresses calling next_matching_node_addr).
+pub fn parse_addresses_with<'a>(
+    buffer: &mut Buffer,
+    input: &'a str,
+    search: SearchHook<'_>,
 ) -> Result<ParsedAddresses<'a>, AddressError> {
     let bytes = input.as_bytes();
     let mut idx = skip_blanks(bytes, 0);
@@ -168,7 +189,10 @@ pub fn parse_addresses<'a>(
                 if !first_mode {
                     return Err(AddressError::InvalidAddress);
                 }
-                return Err(AddressError::RegexNotSupported);
+                let (addr, used) = search(buffer, &input[idx..])?;
+                first_mode = false;
+                idx += used;
+                second_addr = addr as i64;
             }
             b'\'' => {
                 if !first_mode {
