@@ -29,3 +29,4 @@ hive-runner repo, then append it below.
 | 2026-11-25 17:44 | `339eecd` | 124 pass | clean | green | 20/20 | 170/243 | through ticket #88 (PRs #145 to #153 merged Nov 25: P, r, s, t, u, w, W, x) |
 | 2026-11-25 18:11 | `f624c00` | 125 pass | clean | green | 20/20 | 182/243 | through ticket #91 (PRs #155, #157, #159 merged Nov 25: z, !, null command) |
 | 2026-11-25 20:51 | `37b9b6e` | 125 pass | clean | green | 20/20 | 242/243 | through ticket #165 (PRs #168, #169, and #171 merged Nov 25: piped errors, start-up, global list; PR #170 unbuffered stdin left open, conflicts with #169 on startup.rs; wrapper counts start-up checks #167) |
+| 2026-11-25 21:00 | `99f724f` | 125 pass | clean | green | 20/20 | 243/243 | through ticket #165 plus #170 unbuffered stdin (PRs #168-#171 merged Nov 25) |
