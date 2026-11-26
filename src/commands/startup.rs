@@ -5,7 +5,7 @@
 
 use super::editor::Editor;
 use crate::cli::{Options, StartRegexp};
-use std::io::{self, BufReader, IsTerminal};
+use std::io::{self, BufRead, BufReader, IsTerminal};
 
 /// Build the editor and run the loop. Returns the process exit status.
 ///
@@ -26,7 +26,7 @@ use std::io::{self, BufReader, IsTerminal};
 /// error as a warning ("<file>: <errmsg>") to stderr. Finally return
 /// `main_loop::main_loop(&mut ed, initial_error, opts.loose_exit)`.
 pub fn start(opts: Options) -> i32 {
-    let mut ed = Editor::new(opts, Box::new(BufReader::new(io::stdin())));
+    let mut ed = Editor::new(opts, stdin_reader());
     let mut initial_error = false;
     if let Some(file) = ed.opts.file.clone() {
         match load_file(&mut ed, &file) {
@@ -115,4 +115,15 @@ fn apply_re(ed: &mut Editor, re: &StartRegexp, file: &str, extended: bool, quiet
         eprintln!("{shown}: {file}: No match found.");
     }
     if interactive() { Boot::Ok } else { Boot::Exit(1) }
+}
+
+/// Stdin for the editor. Capacity 1 so a shell command can read the next
+/// script line (C `setvbuf` with `_IONBF`). Falls back to a normal reader
+/// when the stdin fd cannot be cloned.
+fn stdin_reader() -> Box<dyn BufRead> {
+    use std::os::fd::AsFd;
+    match io::stdin().as_fd().try_clone_to_owned() {
+        Ok(fd) => Box::new(BufReader::with_capacity(1, std::fs::File::from(fd))),
+        Err(_) => Box::new(BufReader::new(io::stdin())),
+    }
 }
