@@ -75,7 +75,8 @@ pub fn get_filename(
         let mut next = || ed.next_line();
         crate::io::extended::get_extended_line(&first, true, &mut next)?
     };
-    ed.cmd = joined;
+    let tail = first.split_once('\n').map_or("", |(_, rest)| rest);
+    ed.cmd = format!("{joined}{tail}");
     ed.pos = 0;
     if ed.peek() == Some('!') {
         ed.bump();
@@ -145,5 +146,8 @@ mod tests {
         assert_eq!(get_filename(&mut e, false).unwrap(), "");
         assert_eq!(get_filename(&mut ed("\n"), true).unwrap(), "");
         assert_eq!(get_filename(&mut ed("!ls\n"), false).unwrap(), "!ls");
+        let mut e = ed("f\nw\n");
+        assert_eq!(get_filename(&mut e, false).unwrap(), "f");
+        assert_eq!(e.rest(), "w\n");
     }
 }

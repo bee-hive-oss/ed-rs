@@ -4,7 +4,8 @@
 
 use super::editor::Editor;
 use super::Status;
-use std::io::{self, IsTerminal, Write};
+use std::io::{self, Write};
+use std::os::fd::AsFd;
 
 /// Ports main_loop.c `main_loop` without the signal handling.
 ///
@@ -20,10 +21,10 @@ use std::io::{self, IsTerminal, Write};
 /// the exit status. After any failure print "?" and a newline, set the
 /// exit status to 1 unless `loose` (or already set), set `ed.warned` to
 /// whether it was EMOD and if so set `ed.errmsg` to "Warning: buffer
-/// modified". If stdin is not a terminal (C interactive() false; use
-/// `std::io::IsTerminal`), print "script, line N: errmsg" when verbose and
-/// return (1 for Fatal, else the exit status). On Fatal in a terminal
-/// print errmsg when verbose and return 1.
+/// modified". If stdin is a regular file (C interactive() false; a pipe
+/// is not a regular file), print "script, line N: errmsg" when verbose and
+/// return (1 for Fatal, else the exit status). On Fatal when stdin is not
+/// a regular file, print errmsg when verbose and return 1.
 ///
 /// `initial_error` starts the exit status at 1 (a bad file on the command
 /// line).
@@ -68,7 +69,7 @@ pub fn main_loop(ed: &mut Editor, initial_error: bool, loose: bool) -> i32 {
         if ed.warned {
             ed.errmsg = "Warning: buffer modified".to_string();
         }
-        if !io::stdin().is_terminal() {
+        if stdin_is_regular_file() {
             if ed.verbose {
                 println!("script, line {}: {}", ed.linenum, ed.errmsg);
             }
@@ -81,6 +82,17 @@ pub fn main_loop(ed: &mut Editor, initial_error: bool, loose: bool) -> i32 {
             return 1;
         }
     }
+}
+
+/// True when stdin is a regular file. False when it is a pipe or terminal,
+/// or when the fd cannot be cloned or stated (C `interactive()` is then true).
+fn stdin_is_regular_file() -> bool {
+    io::stdin()
+        .as_fd()
+        .try_clone_to_owned()
+        .ok()
+        .and_then(|fd| std::fs::File::from(fd).metadata().ok())
+        .is_some_and(|meta| meta.is_file())
 }
 
 fn end_of_input(ed: &Editor, loose: bool, err_status: &mut i32) -> i32 {
