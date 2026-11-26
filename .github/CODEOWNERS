@@ -1,0 +1,10 @@
+# Every change needs review from the repository owner.
+*                   @Zakox
+
+# Explicitly owned: CI, proofs, build image and project rules.
+/.github/           @Zakox
+/check.sh           @Zakox
+/tests/             @Zakox
+/Containerfile*     @Zakox
+/AGENTS.md          @Zakox
+/SCOREBOARD.md      @Zakox
