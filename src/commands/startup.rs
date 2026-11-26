@@ -5,7 +5,8 @@
 
 use super::editor::Editor;
 use crate::cli::{Options, StartRegexp};
-use std::io::{self, BufReader, IsTerminal};
+use std::io::{self, BufReader};
+use std::os::fd::AsFd;
 
 /// Build the editor and run the loop. Returns the process exit status.
 ///
@@ -17,8 +18,9 @@ use std::io::{self, BufReader, IsTerminal};
 /// check it with `io::getname::may_access_filename`; set the default
 /// filename (unless it starts with `!`); read it with
 /// `io::read::read_file` at address 0 with `&mut ed.bin` (first_e_command), which sets
-/// `ed.read_only`. A failed read is exit 2 when stdin is not a terminal,
-/// otherwise an initial error. Then apply `opts.start_line` (when it is
+/// `ed.read_only`. A failed read is exit 2 when stdin is a regular file.
+/// When it is not, "Cannot open input file" is not an initial error; a
+/// read error is. Then apply `opts.start_line` (when it is
 /// within the buffer) or `opts.start_regexp` (search from address 0 with
 /// `regex::search::next_matching_node_addr`; on no match use line 1 for
 /// `/` or `$` for `?`, print "<re>: <file>: No match found." to stderr
@@ -51,7 +53,18 @@ enum Boot {
 }
 
 fn interactive() -> bool {
-    io::stdin().is_terminal()
+    !stdin_is_regular_file()
+}
+
+/// True when stdin is a regular file. False for a pipe or terminal, and
+/// false when the fd cannot be cloned or stated.
+fn stdin_is_regular_file() -> bool {
+    io::stdin()
+        .as_fd()
+        .try_clone_to_owned()
+        .ok()
+        .and_then(|fd| std::fs::File::from(fd).metadata().ok())
+        .is_some_and(|meta| meta.is_file())
 }
 
 fn load_file(ed: &mut Editor, file: &str) -> Boot {
@@ -79,7 +92,15 @@ fn load_file(ed: &mut Editor, file: &str) -> Boot {
         Ok(out) => out,
         Err(err) => {
             ed.errmsg = err.message().to_string();
-            return if interactive() { Boot::Initial } else { Boot::Exit(2) };
+            if !interactive() {
+                return Boot::Exit(2);
+            }
+            // GNU read_file -1 is not an initial error; -2 is.
+            return if err.message() == "Cannot open input file" {
+                Boot::Ok
+            } else {
+                Boot::Initial
+            };
         }
     };
     ed.read_only = out.read_only;
