@@ -19,7 +19,7 @@ jobs:
     env:
       ED_VERSION: "1.22.4"
       ED_SHA256: 987a1ebbbad3fcf63a1ffa9e29b3fa7de065150d16319d0a49dd8b57f81d3e9c
-      RUST_TOOLCHAIN: "1.85.0"
+      RUST_TOOLCHAIN: stable
       CARGO_TERM_COLOR: never
       HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
@@ -32,7 +32,7 @@ jobs:
       - name: Install Rust toolchain
         run: |
           set -eu
-          rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal --component clippy
+          rustup toolchain install "$RUST_TOOLCHAIN" --profile minimal --component clippy --no-self-update
           rustup default "$RUST_TOOLCHAIN"
           cargo --version
           cargo clippy --version
