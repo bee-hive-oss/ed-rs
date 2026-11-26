@@ -27,3 +27,4 @@ hive-runner repo, then append it below.
 | 2026-11-25 17:23 | `1a1289b` | 117 pass | clean | green | 10/20 | 86/243 | through ticket #41 (PRs #120 to #132 merged Nov 25, input wiring); binary now reads and runs commands, GNU suite waits on r/w/s/g/u (tickets #70 to #91) |
 | 2026-11-25 17:31 | `8fc9eb2` | 123 pass | clean | green | 15/20 | 111/243 | through ticket #80 (PRs #133 to #144 merged Nov 25: E, e, g, v, G, V, h, H, j, k, m) |
 | 2026-11-25 17:44 | `339eecd` | 124 pass | clean | green | 20/20 | 170/243 | through ticket #88 (PRs #145 to #153 merged Nov 25: P, r, s, t, u, w, W, x) |
+| 2026-11-25 18:11 | `f624c00` | 125 pass | clean | green | 20/20 | 182/243 | through ticket #91 (PRs #155, #157, #159 merged Nov 25: z, !, null command) |
