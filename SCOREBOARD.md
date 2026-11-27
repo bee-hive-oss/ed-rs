@@ -41,6 +41,7 @@ Coverage columns added 2026-11-26. New rows include C lines %, C branches %, Rus
 | 2026-11-26 18:52 | `def115e` | 127 pass | clean | green | 20/20 | 243/243 | 84.2% | 67.4% | 79.7% | 66.2% | PR #188 merged Nov 26: AGENTS.md: never use git worktree; plain clone per ticket |
 | 2026-11-26 18:59 | `9ef0573` | 127 pass | clean | green | 20/20 | 243/243 | 84.2% | 67.4% | 79.7% | 66.2% | PR #189 merged Nov 26: Point README and src doc comments at GNU ed 1.22.6 |
 | 2026-11-26 19:00 | `c9c29e0` | 127 pass | clean | green | 20/20 | 243/243 | 84.2% | 67.4% | 79.7% | 66.2% | Yardstick text moved to GNU ed 1.22.6. Coverage figures carried from `992e33d` (no code change). |
+| 2026-11-27 13:12 | `dceea4c` | 127 pass | clean | green | 20/20 | 243/243 | 84.2% | 67.4% | 79.7% | 66.2% | PR #190 merged Nov 27: Move the ed-rs yardstick from GNU ed 1.22.4 to 1.22.6 |
 
 ## Upstream C bugs fixed
 
