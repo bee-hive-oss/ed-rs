@@ -1,0 +1,8 @@
+[publish]
+github_tests = true
+
+[scoreboard]
+auto = true
+
+[tests]
+command = "./check.sh"
