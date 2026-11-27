@@ -1,6 +1,6 @@
 //! Delete a range of lines (the d command).
 //!
-//! Ports GNU ed 1.22.4 buffer.c delete_lines, which exec_command in
+//! Ports GNU ed 1.22.6 buffer.c delete_lines, which exec_command in
 //! main_loop.c calls for the 'd' case after set_addr_range2 and the
 //! command suffix. Default range and suffix checks stay in the
 //! dispatcher.
@@ -28,7 +28,7 @@ use crate::buffer::Buffer;
 /// min(from, last) and marks the buffer dirty. A reversed range, address
 /// 0, or a range past the last line is CommandError::InvalidAddress.
 pub fn delete_lines(buffer: &mut Buffer, from: usize, to: usize) -> Result<(), CommandError> {
-    // Buffer::delete is GNU ed 1.22.4 buffer.c delete_lines after the
+    // Buffer::delete is GNU ed 1.22.6 buffer.c delete_lines after the
     // cut-buffer yank and the isglobal active-list update, both of which
     // belong to later tickets: it rejects address 0, a reversed range, and
     // a range past the last line, then sets current to min(from, last) and
@@ -103,7 +103,7 @@ mod tests {
 
     #[test]
     fn current_before_the_range_still_becomes_min_from_last() {
-        // GNU ed 1.22.4 assigns current_addr_ = min(from, last_addr_)
+        // GNU ed 1.22.6 assigns current_addr_ = min(from, last_addr_)
         // even when `.` was before the deleted range.
         let mut buf = loaded(&["a", "b", "c", "d", "e"]);
         buf.set_current(1).unwrap();

@@ -1,6 +1,6 @@
 //! Numbered print of a resolved line range (the n command).
 //!
-//! Ports the pf_n path of GNU ed 1.22.4 io.c print_lines and print_line,
+//! Ports the pf_n path of GNU ed 1.22.6 io.c print_lines and print_line,
 //! which exec_command in main_loop.c calls for the n case (the pflabel
 //! arm with n = pf_n). Plain print and list mode live in their own files.
 //!

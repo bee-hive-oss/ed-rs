@@ -1,6 +1,6 @@
 //! Interactive global command on lines that do not match (the V command).
 //!
-//! Ports the 'V' arm of GNU ed 1.22.4 main_loop.c exec_command.
+//! Ports the 'V' arm of GNU ed 1.22.6 main_loop.c exec_command.
 
 #![allow(dead_code)]
 

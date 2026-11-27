@@ -1,6 +1,6 @@
 //! Edit a file without the modified check (the E command).
 //!
-//! Ports the 'E' arm of GNU ed 1.22.4 main_loop.c exec_command (the e arm falls through to it).
+//! Ports the 'E' arm of GNU ed 1.22.6 main_loop.c exec_command (the e arm falls through to it).
 
 #![allow(dead_code)]
 

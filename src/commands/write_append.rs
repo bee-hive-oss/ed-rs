@@ -1,6 +1,6 @@
 //! Append the buffer to a file (the W command).
 //!
-//! Ports the 'W' arm of GNU ed 1.22.4 main_loop.c exec_command (write_file with mode "a").
+//! Ports the 'W' arm of GNU ed 1.22.6 main_loop.c exec_command (write_file with mode "a").
 
 #![allow(dead_code)]
 

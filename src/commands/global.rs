@@ -1,6 +1,6 @@
 //! Global command (the g command) and the shared global runner.
 //!
-//! Ports the 'g' arm of GNU ed 1.22.4 main_loop.c exec_command, regex.c build_active_list, and the non-interactive part of main_loop.c exec_global.
+//! Ports the 'g' arm of GNU ed 1.22.6 main_loop.c exec_command, regex.c build_active_list, and the non-interactive part of main_loop.c exec_global.
 
 #![allow(dead_code)]
 

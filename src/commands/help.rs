@@ -1,6 +1,6 @@
 //! Show the last error (the h command).
 //!
-//! Ports the 'h' arm of GNU ed 1.22.4 main_loop.c exec_command.
+//! Ports the 'h' arm of GNU ed 1.22.6 main_loop.c exec_command.
 
 #![allow(dead_code)]
 

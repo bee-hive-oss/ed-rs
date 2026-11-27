@@ -1,6 +1,6 @@
 //! File I/O, shell escapes, prompts, and errors.
 //!
-//! Small files under src/io/ hold the ports of GNU ed 1.22.4 io.c and the
+//! Small files under src/io/ hold the ports of GNU ed 1.22.6 io.c and the
 //! file-name side of main_loop.c. The old `read_file` placeholder stays
 //! until the command loop is wired, so existing callers still compile.
 #![allow(dead_code)]

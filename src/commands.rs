@@ -6,7 +6,7 @@
 //! per command are stubs that their own tickets fill in.
 //!
 //! Shared result types live here so each command file can fill in a body
-//! without also inventing error types. Status values match GNU ed 1.22.4
+//! without also inventing error types. Status values match GNU ed 1.22.6
 //! main_loop.c: enum Status { QUIT = -1, ERR = -2, EMOD = -3, FATAL = -4 }.
 
 #![allow(dead_code)]
@@ -72,7 +72,7 @@ pub fn run(opts: Options) -> i32 {
 /// error whose text goes to `Editor::errmsg`.
 pub type ArmResult = Result<Status, CommandError>;
 
-/// Process / command status from GNU ed 1.22.4 main_loop.c.
+/// Process / command status from GNU ed 1.22.6 main_loop.c.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(i32)]
 pub enum Status {
@@ -89,7 +89,7 @@ pub enum Status {
     Fatal = -4,
 }
 
-/// Recoverable command failure, with the GNU ed 1.22.4 diagnostic text.
+/// Recoverable command failure, with the GNU ed 1.22.6 diagnostic text.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CommandError {
     InvalidAddress,
@@ -100,16 +100,16 @@ pub enum CommandError {
     NoCurrentFilename,
     FilenameTooLong,
     UnknownCommand,
-    /// Writing command output failed. GNU ed 1.22.4 does not check stdout
+    /// Writing command output failed. GNU ed 1.22.6 does not check stdout
     /// writes in print_lines, so this text is ed-rs's own, not GNU's.
     Io(std::io::ErrorKind),
-    /// Any other GNU ed 1.22.4 diagnostic, with its exact text, for example
+    /// Any other GNU ed 1.22.6 diagnostic, with its exact text, for example
     /// "No match" or "Nothing to put".
     Message(&'static str),
 }
 
 impl CommandError {
-    /// Exact GNU ed 1.22.4 set_error_msg / constant text for this error.
+    /// Exact GNU ed 1.22.6 set_error_msg / constant text for this error.
     pub fn message(&self) -> &'static str {
         match self {
             Self::InvalidAddress => "Invalid address",

@@ -1,6 +1,6 @@
 //! Join lines (the j command).
 //!
-//! Ports the 'j' arm of GNU ed 1.22.4 main_loop.c exec_command and buffer.c join_lines.
+//! Ports the 'j' arm of GNU ed 1.22.6 main_loop.c exec_command and buffer.c join_lines.
 
 #![allow(dead_code)]
 

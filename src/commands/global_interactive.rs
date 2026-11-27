@@ -1,6 +1,6 @@
 //! Interactive global command (the G command).
 //!
-//! Ports the 'G' arm of GNU ed 1.22.4 main_loop.c exec_command and the interactive part of main_loop.c exec_global.
+//! Ports the 'G' arm of GNU ed 1.22.6 main_loop.c exec_command and the interactive part of main_loop.c exec_global.
 
 #![allow(dead_code)]
 

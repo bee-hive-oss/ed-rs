@@ -1,6 +1,6 @@
 //! List-mode print of a resolved line range (the l command).
 //!
-//! Ports the pf_l path of GNU ed 1.22.4 io.c print_lines and print_line,
+//! Ports the pf_l path of GNU ed 1.22.6 io.c print_lines and print_line,
 //! including escchar, which exec_command in main_loop.c calls for the l
 //! case (the pflabel arm with n = pf_l). Plain print and numbered print
 //! live in their own files.
@@ -13,7 +13,7 @@
 use super::CommandError;
 use std::io::Write;
 
-/// Default window width used by GNU ed 1.22.4 list mode when no SIGWINCH
+/// Default window width used by GNU ed 1.22.6 list mode when no SIGWINCH
 /// size is available (signal.c window_columns_ starts at 76).
 pub const DEFAULT_WINDOW_COLUMNS: usize = 76;
 

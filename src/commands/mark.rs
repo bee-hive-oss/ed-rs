@@ -1,6 +1,6 @@
 //! Mark a line (the k command).
 //!
-//! Ports the 'k' arm of GNU ed 1.22.4 main_loop.c exec_command and main_loop.c mark_line_node.
+//! Ports the 'k' arm of GNU ed 1.22.6 main_loop.c exec_command and main_loop.c mark_line_node.
 
 #![allow(dead_code)]
 

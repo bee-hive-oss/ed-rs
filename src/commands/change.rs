@@ -1,6 +1,6 @@
 //! Change lines (the c command).
 //!
-//! Ports the 'c' arm of GNU ed 1.22.4 main_loop.c exec_command, with buffer.c delete_lines and append_lines.
+//! Ports the 'c' arm of GNU ed 1.22.6 main_loop.c exec_command, with buffer.c delete_lines and append_lines.
 
 #![allow(dead_code)]
 

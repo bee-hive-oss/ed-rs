@@ -1,6 +1,6 @@
 //! Append lines after an address (the a command).
 //!
-//! Ports GNU ed 1.22.4 buffer.c append_lines with insert false, which
+//! Ports GNU ed 1.22.6 buffer.c append_lines with insert false, which
 //! exec_command in main_loop.c calls for the a case. Insert lives in its
 //! own file. The c command also calls append_lines after a delete; that
 //! wiring stays in the dispatcher.

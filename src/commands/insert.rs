@@ -1,6 +1,6 @@
 //! Insert lines before an address (the i command).
 //!
-//! Ports GNU ed 1.22.4 buffer.c append_lines with insert true, which
+//! Ports GNU ed 1.22.6 buffer.c append_lines with insert true, which
 //! exec_command in main_loop.c calls for the i case. Append lives in its
 //! own file.
 //!

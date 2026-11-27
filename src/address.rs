@@ -1,6 +1,6 @@
 //! POSIX/GNU ed address and range parser.
 //!
-//! [`parse_addresses`] follows GNU ed 1.22.4 `extract_addresses`. It needs
+//! [`parse_addresses`] follows GNU ed 1.22.6 `extract_addresses`. It needs
 //! `&mut Buffer` because `;` after a parsed address sets the current line
 //! before the next address is read. That update is kept even if the rest of
 //! the parse fails. Nothing else on the buffer changes: lines, marks, the
@@ -54,7 +54,7 @@ impl std::error::Error for AddressError {}
 
 /// Addresses parsed from the front of a command line.
 ///
-/// `count` matches GNU ed 1.22.4 `extract_addresses`:
+/// `count` matches GNU ed 1.22.6 `extract_addresses`:
 /// - `0`: no address was written. `first` and `second` are still both set to
 ///   the current line, and the count stays 0 so the command can apply its own
 ///   default (for example `w` uses `1,$` while `p` uses `.`).
@@ -112,7 +112,7 @@ pub fn parse_addresses<'a>(
 pub type SearchHook<'h> = &'h mut dyn FnMut(&Buffer, &str) -> Result<(usize, usize), AddressError>;
 
 /// [`parse_addresses`] with a search hook for `/re/` and `?re?` (GNU ed
-/// 1.22.4 extract_addresses calling next_matching_node_addr).
+/// 1.22.6 extract_addresses calling next_matching_node_addr).
 pub fn parse_addresses_with<'a>(
     buffer: &mut Buffer,
     input: &'a str,

@@ -6,7 +6,7 @@ Credited to **Bee, Grok Bot, and Nori** under **GPL-3.0-or-later**.
 
 ## Status: 243/243
 
-ed-rs passes **all 243 checks of the official GNU `ed` 1.22.4 test suite**, plus the 20 starter cases byte for byte against GNU `ed`, with `cargo test` and `cargo clippy -D warnings` clean.
+ed-rs passes **all 243 checks of the official GNU `ed` 1.22.6 test suite**, plus the 20 starter cases byte for byte against GNU `ed`, with `cargo test` and `cargo clippy -D warnings` clean.
 
 Progress is tracked in [SCOREBOARD.md](SCOREBOARD.md), one row per measurement after merges to `main`, rows only ever appended. It went from the first stubs to 182/243 to 242/243 and then 243/243 on Nov 25, 2026.
 
@@ -26,12 +26,12 @@ The public GitHub history is an email-only mailmap rewrite of the private Forgej
 - `src/regex.rs` — basic regular expression matching and substitution
 - `src/io.rs` — file I/O, shell escapes, prompts, and errors
 - `tests/diff_harness.py` — side-by-side byte-for-byte scoreboard against GNU `ed`
-- `tests/gnu_ed_testsuite/` — official GNU `ed` 1.22.4 testsuite (GPL-2.0-or-later; unmodified)
+- `tests/gnu_ed_testsuite/` — official GNU `ed` 1.22.6 testsuite (GPL-2.0-or-later; unmodified)
 - `AGENTS.md` — seat map and contribution rules
 
 ## Proofs
 
-The single entry point is `./check.sh`. It runs `cargo test`, `cargo clippy --all-targets -- -D warnings`, the 20 starter cases in `tests/diff_harness.py`, and the official GNU `ed` 1.22.4 testsuite.
+The single entry point is `./check.sh`. It runs `cargo test`, `cargo clippy --all-targets -- -D warnings`, the 20 starter cases in `tests/diff_harness.py`, and the official GNU `ed` 1.22.6 testsuite.
 
 ```sh
 ./check.sh                 # build ed-rs and prove it against GNU ed

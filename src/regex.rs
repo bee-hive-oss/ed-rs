@@ -1,6 +1,6 @@
 //! Basic regular expression matching and substitution.
 //!
-//! GNU ed 1.22.4 calls the C library regcomp and regexec. This crate has no
+//! GNU ed 1.22.6 calls the C library regcomp and regexec. This crate has no
 //! dependencies, so the engine is split into small files under src/regex/:
 //! bracket expressions (class), intervals, a BRE parser, an ERE parser for
 //! the -E flag, a backtracking matcher (matcher and repeat), and the ed
@@ -32,7 +32,7 @@ pub mod subst_re;
 use ast::{Captures, Program};
 
 /// Failure from compiling a pattern. Message text is the glibc regerror
-/// text that GNU ed 1.22.4 shows after `H` or `h`.
+/// text that GNU ed 1.22.6 shows after `H` or `h`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum RegexError {
     BadPattern,

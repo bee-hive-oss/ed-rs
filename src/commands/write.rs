@@ -1,6 +1,6 @@
 //! Write the buffer (the w command, with wq).
 //!
-//! Ports the 'w' arm of GNU ed 1.22.4 main_loop.c exec_command.
+//! Ports the 'w' arm of GNU ed 1.22.6 main_loop.c exec_command.
 
 #![allow(dead_code)]
 

@@ -1,6 +1,6 @@
 //! Undo the last change (the u command).
 //!
-//! Ports the 'u' arm of GNU ed 1.22.4 main_loop.c exec_command and buffer.c undo.
+//! Ports the 'u' arm of GNU ed 1.22.6 main_loop.c exec_command and buffer.c undo.
 
 #![allow(dead_code)]
 

@@ -1,6 +1,6 @@
 //! Global command on lines that do not match (the v command).
 //!
-//! Ports the 'v' arm of GNU ed 1.22.4 main_loop.c exec_command (build_active_list with match false).
+//! Ports the 'v' arm of GNU ed 1.22.6 main_loop.c exec_command (build_active_list with match false).
 
 #![allow(dead_code)]
 

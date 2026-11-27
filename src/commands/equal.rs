@@ -1,6 +1,6 @@
 //! Print a line number (the = command).
 //!
-//! Ports the '=' arm of GNU ed 1.22.4 main_loop.c exec_command:
+//! Ports the '=' arm of GNU ed 1.22.6 main_loop.c exec_command:
 //! `printf( "%d\\n", addr_cnt ? second_addr : last_addr() );`
 //!
 //! Suffix parsing stays in the dispatcher. This function only chooses

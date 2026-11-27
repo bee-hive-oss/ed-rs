@@ -1,6 +1,6 @@
 //! Bracket expression parser (the `[...]` part of a pattern).
 //!
-//! Ports the bracket handling of POSIX regcomp as GNU ed 1.22.4 gets it from
+//! Ports the bracket handling of POSIX regcomp as GNU ed 1.22.6 gets it from
 //! glibc, for the cases ed scripts use: a leading `^`, a `]` first in the
 //! list, ranges, and the classes `[:alpha:]` and the other eleven names.
 //! Collating symbols `[.x.]` and equivalence classes `[=x=]` are accepted

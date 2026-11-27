@@ -1,4 +1,4 @@
-//! The global-active list (GNU ed 1.22.4 global.c).
+//! The global-active list (GNU ed 1.22.6 global.c).
 //!
 //! C keeps line node pointers, which follow a line wherever it moves. ed-rs
 //! keeps line numbers instead, so every arm that adds, deletes, or moves

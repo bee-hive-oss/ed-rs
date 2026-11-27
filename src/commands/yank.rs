@@ -1,6 +1,6 @@
 //! Copy lines to the cut buffer (the y command).
 //!
-//! Ports the 'y' arm of GNU ed 1.22.4 main_loop.c exec_command and buffer.c yank_lines.
+//! Ports the 'y' arm of GNU ed 1.22.6 main_loop.c exec_command and buffer.c yank_lines.
 
 #![allow(dead_code)]
 

@@ -1,6 +1,6 @@
 //! Quit the editor (the q and Q commands).
 //!
-//! Ports the q and Q arms of GNU ed 1.22.4 main_loop.c exec_command.
+//! Ports the q and Q arms of GNU ed 1.22.6 main_loop.c exec_command.
 //! The P command shares that switch arm in C but is not part of this
 //! function: P only toggles the prompt and does not quit.
 //!

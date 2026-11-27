@@ -1,4 +1,4 @@
-//! Command-line parsing for ed-rs, matching GNU ed 1.22.4.
+//! Command-line parsing for ed-rs, matching GNU ed 1.22.6.
 //!
 //! # Invocation name
 //!
@@ -302,7 +302,7 @@ struct Spec {
     takes_arg: bool,
 }
 
-/// GNU ed 1.22.4 option table, in the same order.
+/// GNU ed 1.22.6 option table, in the same order.
 const SPECS: &[Spec] = &[
     Spec {
         code: code::EXTENDED,
