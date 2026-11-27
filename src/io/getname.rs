@@ -9,7 +9,7 @@ use crate::commands::CommandError;
 /// Ports main.c `may_access_filename`.
 ///
 /// Errors, in the C order: an empty name or one ending in `/` is
-/// `Message("Is a directory")`. In restricted mode, a name starting with
+/// `Message("Invalid filename")`. In restricted mode, a name starting with
 /// `!` is `Message("Shell access restricted")` and `..` or any name with a
 /// `/` is `Message("Directory access restricted")`. A newline in the name is
 /// `Message("Newline character not allowed in file names")`. Unless
@@ -21,7 +21,7 @@ pub fn may_access_filename(
     unsafe_names: bool,
 ) -> Result<(), CommandError> {
     if name.is_empty() || name.ends_with('/') {
-        return Err(CommandError::Message("Is a directory"));
+        return Err(CommandError::Message("Invalid filename"));
     }
     if restricted {
         if name.starts_with('!') {
@@ -127,6 +127,16 @@ mod tests {
         let mut e = Editor::new(Options::default(), Box::new(std::io::Cursor::new("")));
         e.cmd = cmd.into();
         e
+    }
+
+    #[test]
+    fn empty_or_trailing_slash_is_invalid_filename() {
+        for name in ["", "FILE/"] {
+            assert_eq!(
+                may_access_filename(name, false, false),
+                Err(CommandError::Message("Invalid filename")),
+            );
+        }
     }
 
     #[test]
