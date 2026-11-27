@@ -31,6 +31,12 @@ hive-runner repo, then append it below.
 | 2026-11-25 20:51 | `37b9b6e` | 125 pass | clean | green | 20/20 | 242/243 | through ticket #165 (PRs #168, #169, and #171 merged Nov 25: piped errors, start-up, global list; PR #170 unbuffered stdin left open, conflicts with #169 on startup.rs; wrapper counts start-up checks #167) |
 | 2026-11-25 21:00 | `99f724f` | 125 pass | clean | green | 20/20 | 243/243 | through ticket #165 plus #170 unbuffered stdin (PRs #168-#171 merged Nov 25) |
 
+Coverage columns added 2026-11-26. New rows include C lines %, C branches %, Rust lines %, and Rust branches % from the GitHub coverage run on that commit (Rust figures are the GNU test suite alone). Earlier rows keep their original columns.
+
+| Date (CT) | Commit | Cargo tests | Clippy | Self-check | Starter cases | GNU ed testsuite | C lines % | C branches % | Rust lines % | Rust branches % | Note |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 2026-11-26 18:19 | `37f10d0` | 126 pass | clean | green | 20/20 | 243/243 | 84.2% | 67.4% | 79.7% | 66.2% | PR #185 merged Nov 26: Diagnose empty and trailing-slash names as Invalid filename |
+
 ## Upstream C bugs fixed
 
 Bugs in the original C tool (the same pinned GNU version as the table
