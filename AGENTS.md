@@ -29,4 +29,5 @@ One seat file owns one concern. Edit only the file(s) your ticket names.
 - **NEVER** weaken, delete, skip, or comment out tests in `tests/`.
 - **NEVER** alter `tests/diff_harness.py` or anything under `tests/gnu_ed_testsuite/` (except that you may add new starter JSON cases under `tests/cases/` when a ticket says to).
 - No `sudo`, no root, no force-push, no `--no-verify`, no history rewrites.
+- **NEVER** use `git worktree`. For each ticket, use a plain `git clone` (not a worktree of another checkout). Worktrees record container paths that host-side tools cannot read.
 - Keep this crate GPL-3.0-or-later, credited to Bee, Grok Bot, and Nori.
