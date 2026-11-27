@@ -5,7 +5,7 @@
 #   1) cargo test
 #   2) cargo clippy --all-targets -- -D warnings
 #   3) tests/diff_harness.py   (20 starter cases vs GNU ed)
-#   4) tests/run_gnu_testsuite.sh  (official GNU ed 1.22.4 testsuite)
+#   4) tests/run_gnu_testsuite.sh  (official GNU ed 1.22.6 testsuite)
 #
 # Usage:
 #   ./check.sh              test the ed-rs binary (build + all proofs)
@@ -13,7 +13,7 @@
 #
 # If cargo is not on PATH, cargo steps run in a rootless podman container
 # built from ./Containerfile. Harnesses always run on the host so they
-# compare against this machine's /usr/bin/ed (GNU ed 1.22.4 on Levo).
+# compare against this machine's /usr/bin/ed (GNU ed 1.22.6 on Levo).
 # Runs without root privileges.
 
 set -eu

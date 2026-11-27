@@ -1,18 +1,17 @@
-GNU ed 1.22.4 official testsuite
+GNU ed 1.22.6 official testsuite
 ================================
 
 These files (except COPYING, copied from the same tarball, and this
-ORIGIN.ed-rs note) are the unmodified testsuite from GNU ed 1.22.4,
+ORIGIN.ed-rs note) are the unmodified testsuite from GNU ed 1.22.6,
 copyright the GNU ed authors, licensed under GPL-2.0-or-later (see
 COPYING). Official check.sh additionally grants unlimited permission
 to copy, distribute, and modify that script.
 
-Upstream tarball: https://ftp.gnu.org/gnu/ed/ed-1.22.4.tar.lz
-Imported from the official source tree as distributed in the Ubuntu
-orig tarball ed_1.22.4.orig.tar.gz (same contents as the upstream
-tree; used because this import host had tar --lzip but no lzip binary).
-sha256(ed_1.22.4.orig.tar.gz)=
-  9b9d7dd462c72563c84dc6043b48187692ca7b902e68a85319e84a4a7da289e0
+The testsuite files did not change from GNU ed 1.22.4.
+
+Upstream tarball: https://ftp.gnu.org/gnu/ed/ed-1.22.6.tar.lz
+sha256(ed-1.22.6.tar.lz)=
+  3f33b22135219c39c3c695f7b7171c2567d3e2a17c798c0a90607320cbb268f2
 
 Do not edit, weaken, delete, or skip the official test files.
 Run them with tests/run_gnu_testsuite.sh (or ./check.sh).

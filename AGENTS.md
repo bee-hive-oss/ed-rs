@@ -1,9 +1,9 @@
 # Agent guide for ed-rs
 
-Clean-room Rust port of GNU `ed`, verified byte-for-byte against GNU `ed` 1.22.4.
+Clean-room Rust port of GNU `ed`, verified byte-for-byte against GNU `ed` 1.22.6.
 License: **GPL-3.0-or-later**. Credited to **Bee, Grok Bot, and Nori**.
 
-The imported official GNU `ed` 1.22.4 testsuite under `tests/gnu_ed_testsuite/`
+The imported official GNU `ed` 1.22.6 testsuite under `tests/gnu_ed_testsuite/`
 remains **GPL-2.0-or-later** (see `tests/gnu_ed_testsuite/COPYING`).
 
 ## Seat files

@@ -4,7 +4,7 @@ How far the Rust port is, measured after merges to `main`. Rows are only ever
 added at the bottom, never edited or removed, so the history stays readable.
 
 Each row is measured in the same sealed rootless Podman image the hive runner
-uses (GNU ed 1.22.4, no network, source read-only):
+uses (GNU ed 1.22.6, no network, source read-only):
 
 - **Cargo tests**: unit tests passing in `cargo test`.
 - **Clippy**: `cargo clippy --all-targets -- -D warnings`.
@@ -12,7 +12,7 @@ uses (GNU ed 1.22.4, no network, source read-only):
   against real GNU ed (243/243 means the yardstick is sound).
 - **Starter cases**: `tests/diff_harness.py`, the 20 cases in `tests/cases/`,
   ed-rs output compared byte for byte with GNU ed.
-- **GNU ed testsuite**: the official GNU ed 1.22.4 suite run against
+- **GNU ed testsuite**: the official GNU ed 1.22.6 suite run against
   `target/release/ed-rs`. `./check.sh` stops after the starter cases when
   any fail, so this column runs the suite directly.
 
@@ -40,6 +40,7 @@ Coverage columns added 2026-11-26. New rows include C lines %, C branches %, Rus
 | 2026-11-26 18:49 | `992e33d` | 127 pass | clean | green | 20/20 | 243/243 | 84.2% | 67.4% | 79.7% | 66.2% | PR #187 merged Nov 26: Add the shared repo-index.toml |
 | 2026-11-26 18:52 | `def115e` | 127 pass | clean | green | 20/20 | 243/243 | 84.2% | 67.4% | 79.7% | 66.2% | PR #188 merged Nov 26: AGENTS.md: never use git worktree; plain clone per ticket |
 | 2026-11-26 18:59 | `9ef0573` | 127 pass | clean | green | 20/20 | 243/243 | 84.2% | 67.4% | 79.7% | 66.2% | PR #189 merged Nov 26: Point README and src doc comments at GNU ed 1.22.6 |
+| 2026-11-26 19:00 | `c9c29e0` | 127 pass | clean | green | 20/20 | 243/243 | 84.2% | 67.4% | 79.7% | 66.2% | Yardstick text moved to GNU ed 1.22.6. Coverage figures carried from `992e33d` (no code change). |
 
 ## Upstream C bugs fixed
 
@@ -50,6 +51,10 @@ upstream bug report when one exists. Rows are only ever added at the
 bottom, never edited or removed.
 
 Count so far: 0.
+
+The empty or trailing-slash filename bug (#180) is fixed in GNU ed 1.22.5,
+so against a 1.22.6 yardstick it is normal parity work and does not count
+as an upstream C bug.
 
 | Date (CT) | Commit | GNU version | Bug | Proof test | Upstream report |
 |---|---|---|---|---|---|

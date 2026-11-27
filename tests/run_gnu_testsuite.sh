@@ -1,5 +1,5 @@
 #!/bin/sh
-# Run GNU ed 1.22.4's official testsuite against a target binary.
+# Run GNU ed 1.22.6's official testsuite against a target binary.
 #
 # Usage:
 #   ED_BIN=/path/to/ed tests/run_gnu_testsuite.sh
@@ -54,18 +54,18 @@ verify_failure_counter() {
 			exit 2
 		fi
 	}
-	_assert_startup_count mixed "$(printf '%s\n' "testing ed-1.22.4..." " 44 52 54" "*** a ***" "*** b ***")" 3
-	_assert_startup_count reasons "$(printf '%s\n' "testing ed-1.22.4..." " 44 (no match) 52 54")" 3
-	_assert_startup_count scripts_only "$(printf '%s\n' "testing ed-1.22.4..." "*** a ***" "*** b ***")" 0
-	_assert_startup_count none "$(printf '%s\n' "testing ed-1.22.4..." "tests completed successfully.")" 0
-	_assert_startup_count blank_lineno "$(printf '%s\n' "testing ed-1.22.4..." "   " "*** a ***")" 0
+	_assert_startup_count mixed "$(printf '%s\n' "testing ed-1.22.6..." " 44 52 54" "*** a ***" "*** b ***")" 3
+	_assert_startup_count reasons "$(printf '%s\n' "testing ed-1.22.6..." " 44 (no match) 52 54")" 3
+	_assert_startup_count scripts_only "$(printf '%s\n' "testing ed-1.22.6..." "*** a ***" "*** b ***")" 0
+	_assert_startup_count none "$(printf '%s\n' "testing ed-1.22.6..." "tests completed successfully.")" 0
+	_assert_startup_count blank_lineno "$(printf '%s\n' "testing ed-1.22.6..." "   " "*** a ***")" 0
 }
 
 verify_failure_counter
 
 SCRIPT_DIR=$(CDPATH= cd -- "$(dirname "$0")" && pwd)
 TESTDIR="${SCRIPT_DIR}/gnu_ed_testsuite"
-VERSION="1.22.4"
+VERSION="1.22.6"
 OFFICIAL_CHECK="${TESTDIR}/check.sh"
 
 ED_BIN="${ED_BIN:-}"
@@ -75,7 +75,7 @@ usage() {
 	cat <<'USAGE'
 Usage: tests/run_gnu_testsuite.sh [--self-check] [ED_BIN]
 
-Run GNU ed 1.22.4's official testsuite against ED_BIN (or $ED_BIN).
+Run GNU ed 1.22.6's official testsuite against ED_BIN (or $ED_BIN).
 --self-check  uses /usr/bin/ed and expects a 100% pass.
 USAGE
 }
