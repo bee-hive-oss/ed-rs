@@ -37,6 +37,7 @@ Coverage columns added 2026-11-26. New rows include C lines %, C branches %, Rus
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | 2026-11-26 18:19 | `37f10d0` | 126 pass | clean | green | 20/20 | 243/243 | 84.2% | 67.4% | 79.7% | 66.2% | PR #185 merged Nov 26: Diagnose empty and trailing-slash names as Invalid filename |
 | 2026-11-26 18:23 | `3dc7c25` | 127 pass | clean | green | 20/20 | 243/243 | 84.2% | 67.4% | 79.7% | 66.2% | PR #186 merged Nov 26: Print backslashes in f output without doubling them |
+| 2026-11-26 18:49 | `992e33d` | 127 pass | clean | green | 20/20 | 243/243 | 84.2% | 67.4% | 79.7% | 66.2% | PR #187 merged Nov 26: Add the shared repo-index.toml |
 
 ## Upstream C bugs fixed
 
