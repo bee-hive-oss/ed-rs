@@ -1,6 +1,6 @@
 //! Default filename (the f command).
 //!
-//! Ports the 'f' arm of GNU ed 1.22.4 main_loop.c exec_command, plus
+//! Ports the 'f' arm of GNU ed 1.22.6 main_loop.c exec_command, plus
 //! set_def_filename in main_loop.c and the stdout side of print_escaped
 //! in main.c (which uses escchar from io.c).
 //!
@@ -33,8 +33,8 @@ use std::io::Write;
 /// Any other non-empty `arg` becomes the default filename
 /// (set_def_filename) and is then printed.
 ///
-/// The printed name uses print_escaped (backslash, and non-printable
-/// bytes as letter escapes or octal), then a newline.
+/// The printed name uses print_escaped (non-printable bytes as letter
+/// escapes or octal), then a newline.
 pub fn command_f(
     arg: &str,
     def_filename: &mut String,
@@ -59,18 +59,15 @@ pub fn command_f(
     Ok(())
 }
 
-/// Stdout side of GNU ed 1.22.4 main.c `print_escaped`.
+/// Stdout side of GNU ed 1.22.6 main.c `print_escaped`.
 ///
-/// Bytes in 0x20..=0x7e are copied, except `'\\'`, which is doubled.
-/// Every other byte is a backslash plus an [`escchar`] letter, or three
-/// octal digits when [`escchar`] returns 0. The C function stops at a
-/// NUL because its argument is a C string; a Rust string ends at its
-/// length, so every byte here is visited.
+/// Bytes in 0x20..=0x7e are copied. Every other byte is a backslash plus
+/// an [`escchar`] letter, or three octal digits when [`escchar`] returns 0.
+/// The C function stops at a NUL because its argument is a C string; a Rust
+/// string ends at its length, so every byte here is visited.
 fn print_escaped(s: &str, out: &mut dyn Write) -> Result<(), CommandError> {
     for &ch in s.as_bytes() {
-        if ch == b'\\' {
-            out.write_all(b"\\\\")?;
-        } else if (0x20..0x7f).contains(&ch) {
+        if (0x20..0x7f).contains(&ch) {
             out.write_all(&[ch])?;
         } else {
             out.write_all(b"\\")?;
@@ -86,7 +83,7 @@ fn print_escaped(s: &str, out: &mut dyn Write) -> Result<(), CommandError> {
     Ok(())
 }
 
-/// GNU ed 1.22.4 io.c `escchar`.
+/// GNU ed 1.22.6 io.c `escchar`.
 ///
 /// `strchr("\a\b\f\n\r\t\v", ch)` indexes `"abfnrtv"`. Any other byte,
 /// including NUL, returns 0 so the caller prints octal.
@@ -166,9 +163,17 @@ mod tests {
         assert!(result.is_ok());
         assert_eq!(
             text,
-            "A\\a\\b\\f\\r\\t\\v\\001\\037 ~\\177C\\\\D caf\\303\\251\n"
+            "A\\a\\b\\f\\r\\t\\v\\001\\037 ~\\177C\\D caf\\303\\251\n"
         );
         assert_eq!(filename, name);
+    }
+
+    #[test]
+    fn prints_a_backslash_and_letter_unchanged() {
+        let (result, text, filename) = run("\\b", "", false);
+        assert!(result.is_ok());
+        assert_eq!(text, "\\b\n");
+        assert_eq!(filename, "\\b");
     }
 
     #[test]
